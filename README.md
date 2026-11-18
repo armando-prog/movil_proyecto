@@ -22,6 +22,8 @@ flutter run
 
 En Windows también se puede ejecutar `flutter run -d windows`; la cámara se reemplaza por selección de una fotografía. En Android/iOS, **Añadir planta** abre la cámara. iOS solicita permiso con una explicación visible.
 
+Para ver la aplicación en el navegador, ejecuta `flutter run -d edge` o `flutter run -d chrome`. La versión web también conserva sus datos en SQLite/WASM dentro de IndexedDB. El selector de archivos del navegador permite añadir fotos.
+
 ## Validar
 
 ```sh

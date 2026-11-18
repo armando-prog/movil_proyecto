@@ -44,11 +44,12 @@ La aplicación se organiza en cinco módulos: acceso y registro, inicio, jardín
 
 SQLite local contiene las tablas `users`, `plants` y `care_logs`. Las plantas y entradas se relacionan con su cuenta y se eliminan en cascada cuando se elimina su entidad padre. Las contraseñas no se almacenan en texto legible: se deriva una clave PBKDF2-HMAC-SHA256 con 120 000 iteraciones y una sal aleatoria por cuenta. La sesión conserva solo el identificador de usuario en las preferencias privadas de la aplicación.
 
-Las imágenes se capturan o eligen desde el dispositivo y se copian al almacenamiento privado de la aplicación. La información no se sincroniza con la nube ni sale del dispositivo.
+Las imágenes se capturan o eligen desde el dispositivo y se guardan en el almacenamiento privado de la aplicación; en navegador, se conservan como datos asociados a la ficha. La información no se sincroniza con la nube ni sale del dispositivo.
 
 ## Interacción y hardware
 
 - En Android e iOS, el control de fotografía invoca la cámara con `image_picker`; la foto se asocia a la ficha de la planta.
+- En navegador, la versión demostrativa usa SQLite/WebAssembly con IndexedDB, conserva los datos y las fotos en el almacenamiento local y permite elegir una fotografía.
 - En Windows, usado como entorno de desarrollo, ese control abre el selector de archivos.
 - La colección y la bitácora admiten el gesto de deslizar para iniciar la eliminación; la ficha pide confirmación antes de eliminar una planta.
 - Controles, botones y navegación respetan gestos táctiles y muestran estados de foco y selección.
@@ -62,7 +63,7 @@ La dirección visual de Brote es editorial y cálida: fondo de papel, verde prof
 ## Tecnología y alcance
 
 - Flutter / Dart y Material 3.
-- `sqflite` en Android/iOS; `sqflite_common_ffi` para SQLite en Windows durante desarrollo y pruebas.
+- `sqflite` en Android/iOS; `sqflite_common_ffi` en Windows y `sqflite_common_ffi_web` (SQLite/WebAssembly e IndexedDB) en navegador.
 - `image_picker` para fotografías y `path_provider` para guardarlas localmente.
 - `cryptography` para el hash de contraseñas y `shared_preferences` para restaurar la sesión.
 

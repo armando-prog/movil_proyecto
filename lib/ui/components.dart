@@ -1,8 +1,7 @@
-import 'dart:io';
-
 import 'package:flutter/material.dart';
 
 import '../data/models.dart';
+import 'image_support.dart';
 import 'theme.dart';
 
 class BroteMark extends StatelessWidget {
@@ -76,14 +75,15 @@ class PlantArtwork extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final file = plant.imagePath;
+    final imagePath = plant.imagePath;
+    final image = imagePath == null ? null : plantImageProvider(imagePath);
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
       child: SizedBox(
         height: height,
         width: double.infinity,
-        child: file != null && File(file).existsSync()
-            ? Image.file(File(file), fit: BoxFit.cover)
+        child: image != null
+            ? Image(image: image, fit: BoxFit.cover)
             : _IllustratedPlant(name: plant.name),
       ),
     );

@@ -1,13 +1,11 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:math';
+import 'dart:typed_data';
 
 import 'package:cryptography/cryptography.dart';
-import 'package:flutter/foundation.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
-import 'package:sqflite_common_ffi/sqflite_ffi.dart';
+import 'package:sqflite_common/sqlite_api.dart';
 
+import 'database_backend.dart' as backend;
 import 'models.dart';
 
 class AuthException implements Exception {
@@ -37,30 +35,16 @@ class DatabaseService {
 
   Future<void> open() async {
     if (_database != null) return;
-    if (kIsWeb) {
-      throw UnsupportedError(
-        'Brote guarda sus datos localmente en SQLite y requiere Android o iOS.',
-      );
-    }
-
-    final isDesktop =
-        Platform.isWindows || Platform.isLinux || Platform.isMacOS;
-    if (isDesktop) {
-      sqfliteFfiInit();
-      databaseFactory = databaseFactoryFfi;
-    }
-    final path =
-        databasePathOverride ??
-        (isDesktop
-            ? p.join(
-                (await getApplicationSupportDirectory()).path,
-                _databaseName,
-              )
-            : p.join(await getDatabasesPath(), _databaseName));
-    _database = await openDatabase(
+    final path = await backend.databasePath(
+      _databaseName,
+      override: databasePathOverride,
+    );
+    _database = await backend.openBroteDatabase(
       path,
       version: _databaseVersion,
-      onConfigure: (db) async => db.execute('PRAGMA foreign_keys = ON'),
+      onConfigure: (db) async {
+        await db.execute('PRAGMA foreign_keys = ON');
+      },
       onCreate: (db, version) async {
         await db.execute('''
           CREATE TABLE users (

@@ -1,13 +1,11 @@
-import 'dart:io';
-
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:path/path.dart' as p;
-import 'package:path_provider/path_provider.dart';
 
 import '../data/models.dart';
 import 'components.dart';
+import 'image_support.dart';
 import 'theme.dart';
 
 class PlantFormPage extends StatefulWidget {
@@ -61,7 +59,10 @@ class _PlantFormPageState extends State<PlantFormPage> {
   Future<void> _takePhoto() async {
     try {
       final picker = ImagePicker();
-      final source = Platform.isAndroid || Platform.isIOS
+      final source =
+          !kIsWeb &&
+              (defaultTargetPlatform == TargetPlatform.android ||
+                  defaultTargetPlatform == TargetPlatform.iOS)
           ? ImageSource.camera
           : ImageSource.gallery;
       final image = await picker.pickImage(
@@ -70,17 +71,8 @@ class _PlantFormPageState extends State<PlantFormPage> {
         imageQuality: 86,
       );
       if (image == null) return;
-      final documents = await getApplicationDocumentsDirectory();
-      final extension = p.extension(image.path).isEmpty
-          ? '.jpg'
-          : p.extension(image.path);
-      final storedFile = await File(image.path).copy(
-        p.join(
-          documents.path,
-          'plant-${DateTime.now().microsecondsSinceEpoch}$extension',
-        ),
-      );
-      if (mounted) setState(() => _imagePath = storedFile.path);
+      final storedImagePath = await savePlantImage(image);
+      if (mounted) setState(() => _imagePath = storedImagePath);
     } on PlatformException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -93,7 +85,7 @@ class _PlantFormPageState extends State<PlantFormPage> {
           ),
         );
       }
-    } on FileSystemException catch (error) {
+    } on ImageStorageException catch (error) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -150,44 +142,57 @@ class _PlantFormPageState extends State<PlantFormPage> {
                 40,
               ),
               children: [
-                GestureDetector(
-                  onTap: _takePhoto,
-                  child: _imagePath != null && File(_imagePath!).existsSync()
-                      ? ClipRRect(
-                          borderRadius: BorderRadius.circular(24),
-                          child: Image.file(
-                            File(_imagePath!),
-                            height: 188,
-                            fit: BoxFit.cover,
-                          ),
-                        )
-                      : Container(
-                          height: 188,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFE4E9D8),
-                            borderRadius: BorderRadius.circular(24),
-                          ),
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              const Icon(
-                                Icons.add_a_photo_outlined,
-                                color: forest,
-                                size: 32,
+                Builder(
+                  builder: (context) {
+                    final imagePath = _imagePath;
+                    final image = imagePath == null
+                        ? null
+                        : plantImageProvider(imagePath);
+                    return GestureDetector(
+                      onTap: _takePhoto,
+                      child: image != null
+                          ? ClipRRect(
+                              borderRadius: BorderRadius.circular(24),
+                              child: Image(
+                                image: image,
+                                height: 188,
+                                width: double.infinity,
+                                fit: BoxFit.cover,
                               ),
-                              const SizedBox(height: 9),
-                              Text(
-                                Platform.isAndroid || Platform.isIOS
-                                    ? 'Toca para tomar una foto'
-                                    : 'Toca para elegir una foto',
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.w600,
-                                  color: forest,
-                                ),
+                            )
+                          : Container(
+                              height: 188,
+                              decoration: BoxDecoration(
+                                color: const Color(0xFFE4E9D8),
+                                borderRadius: BorderRadius.circular(24),
                               ),
-                            ],
-                          ),
-                        ),
+                              child: Column(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  const Icon(
+                                    Icons.add_a_photo_outlined,
+                                    color: forest,
+                                    size: 32,
+                                  ),
+                                  const SizedBox(height: 9),
+                                  Text(
+                                    !kIsWeb &&
+                                            (defaultTargetPlatform ==
+                                                    TargetPlatform.android ||
+                                                defaultTargetPlatform ==
+                                                    TargetPlatform.iOS)
+                                        ? 'Toca para tomar una foto'
+                                        : 'Toca para elegir una foto',
+                                    style: const TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      color: forest,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+                    );
+                  },
                 ),
                 const SizedBox(height: 24),
                 const Eyebrow('LO ESENCIAL'),
