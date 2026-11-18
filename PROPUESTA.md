@@ -17,7 +17,7 @@ Diseñar e implementar una aplicación móvil adaptativa que integre autenticaci
 - **Persona registrada:** crea una cuenta local, administra su jardín, registra cuidados y modifica su nombre de perfil.
 - **Persona sin cuenta:** puede registrarse o iniciar sesión; la colección queda asociada a su cuenta en el dispositivo.
 
-La primera cuenta inicia con tres fichas de ejemplo editables y eliminables para que se pueda recorrer la aplicación desde el primer acceso.
+Cada cuenta nueva inicia con tres fichas de ejemplo editables y eliminables para que se pueda recorrer la aplicación desde el primer acceso.
 
 ## Módulos principales
 

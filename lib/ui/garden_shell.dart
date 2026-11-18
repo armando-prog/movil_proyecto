@@ -984,7 +984,7 @@ class _WaterStatus extends StatelessWidget {
         ? 'Toca regar'
         : days <= 0
         ? 'Mañana'
-        : 'En $days días';
+        : 'En $days ${days == 1 ? 'día' : 'días'}';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 4),
       decoration: BoxDecoration(
